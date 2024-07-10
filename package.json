@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "description": "A simple torrent client for learning purposes",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Satvik Agrawal",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bencode": "^4.0.0",
+    "bencode-js": "^0.0.8"
+  }
 }
