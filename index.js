@@ -1,30 +1,34 @@
+"use strict";
+
 import * as fs from "fs";
 import bencode from "bencode";
-import dgram from "dgram";
-import { Buffer } from "buffer";
-import urlParser from "url";
+import * as tracker from "./tracker.js";
+import { parse as urlParse } from "url";
+import crypto from "crypto";
 
-const torrentFile = fs.readFileSync("test.torrent");
+const torrentFile = fs.readFileSync("big-buck-bunny.torrent");
 const torrent = bencode.decode(torrentFile);
 
-const url = urlParser.parse(torrent.announce.toString("utf-8"));
+// tracker.getPeers(torrent, (peers) => {
+//   console.log("peers: ", peers);
+// });
 
-const socket = dgram.createSocket("udp4");
-const myMsg = Buffer.from("Hello?", "utf-8");
+const buf = Buffer.alloc(16);
 
-console.log(url.port);
+buf.writeUInt32BE(0x417, 0);
+buf.writeUInt32BE(0x27101980, 4);
+buf.writeUInt32BE(0, 8);
+crypto.randomBytes(4).copy(buf, 12);
+console.log(buf);
 
-const port = url.port ? parseInt(url.port) : 80;
+const buffer = Buffer.alloc(16);
 
-socket.send(myMsg, 0, myMsg.length, port, url.hostname, (err) => {
-  if (err) {
-    console.error(`Failed to send message: ${err}`);
-  } else {
-    console.log("Message sent!");
-  }
-});
+// Fill the buffer with the specified data
+buffer.writeBigUInt64BE(BigInt("0x41727101980"), 0); // connection_id
+buffer.writeUInt32BE(0, 8); // action (connect)
 
-// Set up a response listener
-socket.on("message", (msg) => {
-  console.log("message is", msg);
-});
+// Generate a random 32-bit integer for transaction_id
+const transactionId = crypto.randomBytes(4).readUInt32BE(0);
+buffer.writeUInt32BE(transactionId, 12);
+
+console.log(buffer);
